@@ -18,6 +18,7 @@ java {
 
 configurations.all {
     resolutionStrategy {
+        // Force consistent Guava version to avoid conflicts with Checkstyle dependencies
         force 'com.google.guava:guava:32.0.1-jre'
     }
 }
@@ -58,6 +59,12 @@ configurations {
     uiTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
+checkstyle {
+    toolVersion = '10.12.2'  // Or your desired version
+    configFile = file('Checkstyle.xml') // Points to your root project Checkstyle.xml
+    ignoreFailures = false
+}
+
 tasks.named('test') {
     useJUnitPlatform()
     finalizedBy tasks.named('integrationTest'), tasks.named('jacocoTestReport')
@@ -85,5 +92,7 @@ jacocoTestReport {
     reports {
         xml.required = true
         html.required = true
+
     }
 }
+
