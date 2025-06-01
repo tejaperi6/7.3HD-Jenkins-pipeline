@@ -32,7 +32,7 @@ pipeline {
             }
             post {
                 always {
-                    dependencyCheckPublisher pattern: '**/build/reports/dependency-check-report.xml'
+                    echo "Dependency check completed. Report available at build/reports/dependency-check-report.html"
                 }
             }
         }
@@ -40,8 +40,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                // Example deploy: run jar in background (replace with your real deployment)
-                sh 'nohup java -jar build/libs/*.jar &'
+                // Add your actual deployment commands here (e.g., docker-compose, kubectl, shell script)
             }
         }
     }
