@@ -16,11 +16,38 @@ java {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 configurations.all {
     resolutionStrategy {
-        // Force consistent Guava version to avoid conflicts with Checkstyle dependencies
+        // Force Guava to a single version to avoid conflicts
         force 'com.google.guava:guava:32.0.1-jre'
     }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    runtimeOnly 'com.h2database:h2'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.27.0'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Exclude google-collections from Checkstyle to avoid conflict
+    checkstyle("com.puppycrawl.tools:checkstyle:10.12.2") {
+        exclude group: 'com.google.collections', module: 'google-collections'
+    }
+}
+
+checkstyle {
+    toolVersion = '10.12.2'
+    configFile = file('Checkstyle.xml')
+    ignoreFailures = false
 }
 
 sourceSets {
@@ -36,33 +63,11 @@ sourceSets {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    runtimeOnly 'com.h2database:h2'
-
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.seleniumhq.selenium:selenium-java:4.27.0'
-    testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
 configurations {
     integrationTestImplementation.extendsFrom testImplementation
     integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
     uiTestImplementation.extendsFrom testImplementation
     uiTestRuntimeOnly.extendsFrom testRuntimeOnly
-}
-
-checkstyle {
-    toolVersion = '10.12.2'  // Or your desired version
-    configFile = file('Checkstyle.xml') // Points to your root project Checkstyle.xml
-    ignoreFailures = false
 }
 
 tasks.named('test') {
@@ -92,7 +97,5 @@ jacocoTestReport {
     reports {
         xml.required = true
         html.required = true
-
     }
 }
-
