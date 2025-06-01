@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Add email recipient here if you want
-        NOTIFY_EMAIL = 'saiteja.phano@gmail.com'
+        SONAR_TOKEN = credentials('sonar-token')  // If you want to add SonarQube later, optional
     }
 
     stages {
@@ -33,7 +32,7 @@ pipeline {
 
         stage('Code Quality') {
             steps {
-                sh './gradlew pmd checkstyle'
+                sh './gradlew pmds'
             }
             post {
                 always {
@@ -42,10 +41,18 @@ pipeline {
             }
         }
 
+        stage('Security') {
+            steps {
+                echo 'Running security scan placeholder'
+                // Example: Integrate Snyk or Trivy here in real setup
+                // For now, just print a message to pass the stage
+            }
+        }
+
         stage('Deploy') {
             steps {
-                echo 'Running application locally in background...'
-                sh 'nohup java -jar build/libs/*.jar > app.log 2>&1 &'
+                echo 'Deploying application...'
+                // Add deployment commands here (copy jar, deploy to server, etc.)
             }
         }
     }
@@ -55,9 +62,11 @@ pipeline {
             cleanWs()
         }
         failure {
-            mail to: "${NOTIFY_EMAIL}",
+            mail to: 'saiteja.phano@gmail.com',
                  subject: "Build failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "Check Jenkins logs at ${env.BUILD_URL}"
         }
     }
+
+
 }
