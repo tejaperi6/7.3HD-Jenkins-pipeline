@@ -7,6 +7,15 @@ plugins {
     id 'checkstyle'
 }
 
+group = 'com.rbittencourt'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 configurations.all {
     resolutionStrategy {
         force 'com.google.guava:guava:32.0.1-jre'
@@ -77,18 +86,4 @@ jacocoTestReport {
         xml.required = true
         html.required = true
     }
-}
-
-// Optional: Configure Checkstyle to find the config file location
-checkstyle {
-    toolVersion = '10.12.2' // or your preferred version
-    configFile = file('config/checkstyle/checkstyle.xml')
-    ignoreFailures = false
-}
-
-// Optional: PMD config (you can add custom rules if you want)
-pmd {
-    toolVersion = '6.55.0' // or your preferred version
-    ignoreFailures = false
-    ruleSets = ['java-basic', 'java-design']
 }
