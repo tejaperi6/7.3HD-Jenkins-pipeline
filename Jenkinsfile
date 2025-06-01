@@ -28,7 +28,6 @@ pipeline {
 
         stage('Code Quality') {
             steps {
-                // Run PMD and Checkstyle on main and test source
                 sh './gradlew pmdMain pmdTest checkstyleMain checkstyleTest'
             }
             post {
@@ -41,8 +40,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                // Add your deployment commands here, for example:
-                // sh './deploy-script.sh'
+                // Add your deploy commands here if any
             }
         }
     }
