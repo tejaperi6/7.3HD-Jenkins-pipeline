@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = 'SonarQubeServer'            // Jenkins SonarQube server config name
-        SONAR_TOKEN = credentials('sonar-token') // Jenkins credential ID for Sonar token
+        // Add email recipient here if you want
+        NOTIFY_EMAIL = 'saiteja.phano@gmail.com'
     }
 
     stages {
@@ -15,14 +15,14 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh './gradlew clean build --stacktrace --info --warning-mode all'
+                sh './gradlew clean build'
                 archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
             }
         }
 
         stage('Test') {
             steps {
-                sh './gradlew test --stacktrace --info --warning-mode all'
+                sh './gradlew test'
             }
             post {
                 always {
@@ -33,25 +33,19 @@ pipeline {
 
         stage('Code Quality') {
             steps {
-                withSonarQubeEnv(SONARQUBE) {
-                    sh """
-                      ./gradlew sonar \\
-                      -Dsonar.projectKey=my-java-project-teja \\
-                      -Dsonar.projectName='my-java-project-teja' \\
-                      -Dsonar.host.url=http://localhost:9000 \\
-                      -Dsonar.token='${SONAR_TOKEN}'
-                    """
-                }
+                sh './gradlew pmd checkstyle'
             }
             post {
-                success {
-                    script {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            error "Quality gate failed: ${qg.status}"
-                        }
-                    }
+                always {
+                    recordIssues tools: [pmd(), checkStyle()]
                 }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Running application locally in background...'
+                sh 'nohup java -jar build/libs/*.jar > app.log 2>&1 &'
             }
         }
     }
@@ -61,7 +55,7 @@ pipeline {
             cleanWs()
         }
         failure {
-            mail to: 'saiteja.phano@gmail.com',
+            mail to: "${NOTIFY_EMAIL}",
                  subject: "Build failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "Check Jenkins logs at ${env.BUILD_URL}"
         }
