@@ -1,91 +1,83 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.4.1'
-	id 'io.spring.dependency-management' version '1.1.7'
-	id 'jacoco'
-	id 'org.sonarqube' version '6.0.1.5171'
+    id 'java'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
+    id 'pmd'       // optional for code quality
+    id 'checkstyle' // optional for code quality
 }
 
 group = 'com.rbittencourt'
 version = '1.0.0'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 sourceSets {
-	integrationTest {
-		java.srcDirs = ['src/it/java']
-		compileClasspath += sourceSets.main.output
-		runtimeClasspath += sourceSets.main.output
-	}
-	uiTest {
-		java.srcDirs = ['src/ui-test']
-		compileClasspath += sourceSets.main.output
-		runtimeClasspath += sourceSets.main.output
-	}
+    integrationTest {
+        java.srcDirs = ['src/it/java']
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+    uiTest {
+        java.srcDirs = ['src/ui-test']
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	runtimeOnly 'com.h2database:h2'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.seleniumhq.selenium:selenium-java:4.27.0'
-	testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    runtimeOnly 'com.h2database:h2'
+    
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.27.0'
+    testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 configurations {
-	integrationTestImplementation.extendsFrom testImplementation
-	integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
-	uiTestImplementation.extendsFrom testImplementation
-	uiTestRuntimeOnly.extendsFrom testRuntimeOnly
-}
-
-sonar {
-	properties {
-		property("sonar.projectKey", "my-java-project")
-		property("sonar.projectName", "My Java Project")
-		property("sonar.host.url", "http://localhost:9000")   // use localhost or your server URL
-		property("sonar.login", System.getenv("SONAR_TOKEN")) // token passed from Jenkins environment
-	}
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+    uiTestImplementation.extendsFrom testImplementation
+    uiTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
-	finalizedBy integrationTest, jacocoTestReport
+    useJUnitPlatform()
+    finalizedBy tasks.named('integrationTest'), tasks.named('jacocoTestReport')
 }
 
 tasks.register('integrationTest', Test) {
-	testClassesDirs = sourceSets.integrationTest.output.classesDirs
-	classpath = sourceSets.integrationTest.runtimeClasspath
-
-	useJUnitPlatform()
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    useJUnitPlatform()
 }
 
 tasks.register('uiTest', Test) {
-	testClassesDirs = sourceSets.uiTest.output.classesDirs
-	classpath = sourceSets.uiTest.runtimeClasspath
-
-	useJUnitPlatform()
+    testClassesDirs = sourceSets.uiTest.output.classesDirs
+    classpath = sourceSets.uiTest.runtimeClasspath
+    useJUnitPlatform()
 }
 
 test {
-	finalizedBy jacocoTestReport
+    finalizedBy 'jacocoTestReport'
 }
 
 jacocoTestReport {
-	executionData integrationTest
-	dependsOn test, integrationTest
-	reports {
-		xml.required = true
-	}
+    executionData(tasks.integrationTest)
+    dependsOn tasks.test, tasks.integrationTest
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
