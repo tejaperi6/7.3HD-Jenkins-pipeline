@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        SONAR_TOKEN = credentials('sonar-token')  // If you want to add SonarQube later, optional
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -32,7 +28,8 @@ pipeline {
 
         stage('Code Quality') {
             steps {
-                sh './gradlew pmd'
+                // Run PMD and Checkstyle on main and test source
+                sh './gradlew pmdMain pmdTest checkstyleMain checkstyleTest'
             }
             post {
                 always {
@@ -41,18 +38,11 @@ pipeline {
             }
         }
 
-        stage('Security') {
-            steps {
-                echo 'Running security scan placeholder'
-                // Example: Integrate Snyk or Trivy here in real setup
-                // For now, just print a message to pass the stage
-            }
-        }
-
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                // Add deployment commands here (copy jar, deploy to server, etc.)
+                // Add your deployment commands here, for example:
+                // sh './deploy-script.sh'
             }
         }
     }
@@ -67,6 +57,4 @@ pipeline {
                  body: "Check Jenkins logs at ${env.BUILD_URL}"
         }
     }
-
-
 }
