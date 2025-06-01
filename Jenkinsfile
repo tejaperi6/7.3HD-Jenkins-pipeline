@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = 'SonarQubeServer'             // Jenkins SonarQube server name
-        SONAR_TOKEN = credentials('sonar-token')  // Jenkins secret text credential ID for SonarQube token
+        SONARQUBE = 'SonarQubeServer'  // Must match Jenkins SonarQube server config name
     }
 
     stages {
@@ -38,8 +37,7 @@ pipeline {
                         ./gradlew sonarqube \
                           -Dsonar.projectKey=my-java-project-teja \
                           -Dsonar.projectName='my-java-project-teja' \
-                          -Dsonar.host.url=http://localhost:9000 \
-                          -Dsonar.token=$SONAR_TOKEN
+                          -Dsonar.host.url=http://localhost:9000
                     """
                 }
             }
@@ -61,11 +59,9 @@ pipeline {
             cleanWs()
         }
         failure {
-            mail to: 'saiteja.phani@example.com',
+            mail to: 'team@example.com',
                  subject: "Build failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "Check Jenkins logs at ${env.BUILD_URL}"
         }
     }
-
-
 }
