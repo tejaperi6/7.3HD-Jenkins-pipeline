@@ -52,7 +52,10 @@ configurations {
 
 sonar {
 	properties {
-		property("sonar.host.url", "http://sonar:9000")
+		property("sonar.projectKey", "my-java-project")
+		property("sonar.projectName", "My Java Project")
+		property("sonar.host.url", "http://localhost:9000")   // use localhost or your server URL
+		property("sonar.login", System.getenv("SONAR_TOKEN")) // token passed from Jenkins environment
 	}
 }
 
