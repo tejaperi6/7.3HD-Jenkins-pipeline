@@ -32,7 +32,7 @@ pipeline {
 
         stage('Code Quality') {
             steps {
-                sh './gradlew pmds'
+                sh './gradlew pmd'
             }
             post {
                 always {
