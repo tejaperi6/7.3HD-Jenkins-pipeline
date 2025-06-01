@@ -3,7 +3,8 @@ plugins {
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
-    id 'pmd'       // optional for code quality
+    id 'pmd'
+    id 'checkstyle'     // Added Checkstyle plugin
 }
 
 group = 'com.rbittencourt'
@@ -37,7 +38,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     runtimeOnly 'com.h2database:h2'
-    
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.seleniumhq.selenium:selenium-java:4.27.0'
     testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
@@ -79,4 +80,18 @@ jacocoTestReport {
         xml.required = true
         html.required = true
     }
+}
+
+// Optional: Configure Checkstyle to find the config file location
+checkstyle {
+    toolVersion = '10.12.2' // or your preferred version
+    configFile = file('config/checkstyle/checkstyle.xml')
+    ignoreFailures = false
+}
+
+// Optional: PMD config (you can add custom rules if you want)
+pmd {
+    toolVersion = '6.55.0' // or your preferred version
+    ignoreFailures = false
+    ruleSets = ['java-basic', 'java-design']
 }
