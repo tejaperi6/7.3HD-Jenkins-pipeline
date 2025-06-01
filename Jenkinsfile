@@ -7,6 +7,12 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Build') {
             steps {
                 sh './gradlew clean build'
@@ -28,7 +34,13 @@ pipeline {
         stage('Code Quality') {
             steps {
                 withSonarQubeEnv(SONARQUBE) {
-                    sh "./gradlew sonarqube -Dsonar.login=$SONAR_TOKEN"
+                    sh """
+                        ./gradlew sonarqube \
+                          -Dsonar.projectKey=my-java-project-teja \
+                          -Dsonar.projectName='my-java-project-teja' \
+                          -Dsonar.host.url=http://localhost:9000 \
+                          -Dsonar.token=$SONAR_TOKEN
+                    """
                 }
             }
             post {
