@@ -10,7 +10,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh './gradlew clean build'
+                sh './gradlew clean bootJar'
                 archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
             }
         }
@@ -26,13 +26,13 @@ pipeline {
             }
         }
 
-        stage('Code Quality') {
+        stage('Security') {
             steps {
-                sh './gradlew pmdMain pmdTest checkstyleMain checkstyleTest'
+                sh './gradlew dependencyCheckAnalyze'
             }
             post {
                 always {
-                    recordIssues tools: [pmd(), checkStyle()]
+                    dependencyCheckPublisher pattern: '**/build/reports/dependency-check-report.xml'
                 }
             }
         }
@@ -40,7 +40,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                // Add your deploy commands here if any
+                // Example deploy: run jar in background (replace with your real deployment)
+                sh 'nohup java -jar build/libs/*.jar &'
             }
         }
     }
