@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE = 'SonarQubeServer'  // Jenkins SonarQube server config name
-        SONAR_TOKEN = credentials('sonar-token')  // Jenkins credential ID for Sonar token
+        SONARQUBE = 'SonarQubeServer'            // Jenkins SonarQube server config name
+        SONAR_TOKEN = credentials('sonar-token') // Jenkins credential ID for Sonar token
     }
 
     stages {
@@ -35,7 +35,11 @@ pipeline {
             steps {
                 withSonarQubeEnv(SONARQUBE) {
                     sh """
-                        ./gradlew sonar -Dsonar.projectKey=my-java-project-teja -Dsonar.projectName='my-java-project-teja' -Dsonar.token=$SONAR_TOKEN
+                      ./gradlew sonar \\
+                      -Dsonar.projectKey=my-java-project-teja \\
+                      -Dsonar.projectName='my-java-project-teja' \\
+                      -Dsonar.host.url=http://localhost:9000 \\
+                      -Dsonar.token='${SONAR_TOKEN}'
                     """
                 }
             }
