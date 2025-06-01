@@ -3,7 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
-    id 'org.owasp.dependencycheck' version '8.4.0' // security plugin
+    id 'org.owasp.dependencycheck' version '8.4.0' // Add OWASP dependency check plugin
 }
 
 group = 'com.rbittencourt'
@@ -12,6 +12,19 @@ version = '1.0.0'
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+sourceSets {
+    integrationTest {
+        java.srcDirs = ['src/it/java']
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+    uiTest {
+        java.srcDirs = ['src/ui-test']
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
     }
 }
 
@@ -31,19 +44,48 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-test {
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+    uiTestImplementation.extendsFrom testImplementation
+    uiTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy tasks.named('integrationTest'), tasks.named('jacocoTestReport')
+}
+
+tasks.register('integrationTest', Test) {
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    useJUnitPlatform()
+}
+
+tasks.register('uiTest', Test) {
+    testClassesDirs = sourceSets.uiTest.output.classesDirs
+    classpath = sourceSets.uiTest.runtimeClasspath
+    useJUnitPlatform()
+}
+
+test {
     finalizedBy 'jacocoTestReport'
 }
 
 jacocoTestReport {
-    dependsOn test
+    executionData(tasks.integrationTest)
+    dependsOn tasks.test, tasks.integrationTest
     reports {
         xml.required = true
         html.required = true
     }
 }
 
+// Configure OWASP Dependency Check plugin
 dependencyCheck {
-	failBuildOnCVSS = 11.0 // allow build to succeed even with high vulnerabilities
+    failBuildOnCVSS = 7.0   // fail build if vulnerabilities with CVSS score >= 7 found
+    suppressionFile = 'dependency-check-suppressions.xml' // optional, if you have suppressions
+    analyzers.assemblyEnabled = false
+    formats = ['HTML', 'XML']
+    outputDirectory = "$buildDir/reports/dependency-check"
 }
