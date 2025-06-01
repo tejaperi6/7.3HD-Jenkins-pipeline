@@ -15,14 +15,14 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh './gradlew clean build'
+                sh './gradlew clean build --stacktrace --info --warning-mode all'
                 archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
             }
         }
 
         stage('Test') {
             steps {
-                sh './gradlew test'
+                sh './gradlew test --stacktrace --info --warning-mode all'
             }
             post {
                 always {
