@@ -6,6 +6,11 @@ plugins {
     id 'org.owasp.dependencycheck' version '8.4.0' // OWASP Dependency Check plugin
 }
 
+
+
+
+
+
 group = 'com.rbittencourt'
 version = '1.0.0'
 
