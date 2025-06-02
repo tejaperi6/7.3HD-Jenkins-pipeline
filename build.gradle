@@ -3,7 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
-    id 'org.owasp.dependencycheck' version '8.4.0' // Add OWASP dependency check plugin
+    id 'org.owasp.dependencycheck' version '8.4.0' // OWASP Dependency Check plugin
 }
 
 group = 'com.rbittencourt'
@@ -81,11 +81,11 @@ jacocoTestReport {
     }
 }
 
-// Configure OWASP Dependency Check plugin
+// OWASP Dependency Check plugin config
 dependencyCheck {
-    failBuildOnCVSS = 7.0   // fail build if vulnerabilities with CVSS score >= 7 found
-    suppressionFile = 'dependency-check-suppressions.xml' // optional, if you have suppressions
-    analyzers.assemblyEnabled = false
-    formats = ['HTML', 'XML']
+    failBuildOnCVSS = 7.0             // Fail build if vulnerabilities with CVSS >= 7 found
+    // suppressionFile = 'dependency-check-suppressions.xml'  // Uncomment if you have a suppression file
+    analyzers.assemblyEnabled = false // Disable assembly analyzer (optional, depends on project)
+    formats = ['HTML', 'XML']         // Report formats
     outputDirectory = "$buildDir/reports/dependency-check"
 }
