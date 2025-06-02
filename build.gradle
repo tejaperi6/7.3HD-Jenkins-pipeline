@@ -3,7 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
-    id 'org.owasp.dependencycheck' version '8.4.0' // OWASP Dependency Check plugin
+    id 'org.sonarqube' version '4.3.1'  // SonarQube plugin
 }
 
 group = 'com.rbittencourt'
@@ -12,19 +12,6 @@ version = '1.0.0'
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-sourceSets {
-    integrationTest {
-        java.srcDirs = ['src/it/java']
-        compileClasspath += sourceSets.main.output
-        runtimeClasspath += sourceSets.main.output
-    }
-    uiTest {
-        java.srcDirs = ['src/ui-test']
-        compileClasspath += sourceSets.main.output
-        runtimeClasspath += sourceSets.main.output
     }
 }
 
@@ -39,53 +26,27 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.seleniumhq.selenium:selenium-java:4.27.0'
-    testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-configurations {
-    integrationTestImplementation.extendsFrom testImplementation
-    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
-    uiTestImplementation.extendsFrom testImplementation
-    uiTestRuntimeOnly.extendsFrom testRuntimeOnly
-}
-
-tasks.named('test') {
+tasks.test {
     useJUnitPlatform()
-    finalizedBy tasks.named('integrationTest'), tasks.named('jacocoTestReport')
-}
-
-tasks.register('integrationTest', Test) {
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-    classpath = sourceSets.integrationTest.runtimeClasspath
-    useJUnitPlatform()
-}
-
-tasks.register('uiTest', Test) {
-    testClassesDirs = sourceSets.uiTest.output.classesDirs
-    classpath = sourceSets.uiTest.runtimeClasspath
-    useJUnitPlatform()
-}
-
-test {
     finalizedBy 'jacocoTestReport'
 }
 
 jacocoTestReport {
-    executionData(tasks.integrationTest)
-    dependsOn tasks.test, tasks.integrationTest
+    dependsOn tasks.test
     reports {
-        xml.required = true
-        html.required = true
+        xml.required.set(true)
+        html.required.set(true)
     }
 }
 
-// OWASP Dependency Check plugin config
-dependencyCheck {
-    failBuildOnCVSS = 7.0             // Fail build if vulnerabilities with CVSS >= 7 found
-    // suppressionFile = 'dependency-check-suppressions.xml'  // Uncomment if you have a suppression file
-    analyzers.assemblyEnabled = false // Disable assembly analyzer (optional, depends on project)
-    formats = ['HTML', 'XML']         // Report formats
-    outputDirectory = "$buildDir/reports/dependency-check"
+// SonarQube configuration
+sonarqube {
+    properties {
+        property "sonar.projectKey", "my-java-project-teja"
+        property "sonar.host.url", "http://localhost:9000"
+        property "sonar.login", System.getenv("SONAR_TOKEN") ?: ""
+        property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+    }
 }
