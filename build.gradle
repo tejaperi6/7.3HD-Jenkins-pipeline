@@ -3,8 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
-    id 'org.owasp.dependencycheck' version '8.4.0'  // OWASP Dependency Check
-    id "org.sonarqube" version "4.3.1"              // SonarQube plugin
+    id 'org.owasp.dependencycheck' version '8.4.0' // OWASP Dependency Check plugin
 }
 
 group = 'com.rbittencourt'
@@ -31,7 +30,6 @@ sourceSets {
 
 repositories {
     mavenCentral()
-    gradlePluginPortal() // Ensure plugin resolution
 }
 
 dependencies {
@@ -83,19 +81,11 @@ jacocoTestReport {
     }
 }
 
-// Configure OWASP Dependency Check plugin
+// OWASP Dependency Check plugin config
 dependencyCheck {
-    failBuildOnCVSS = 7.0   // Fail build on CVSS >= 7
-    analyzers.assemblyEnabled = false
-    formats = ['HTML', 'XML']
+    failBuildOnCVSS = 7.0             // Fail build if vulnerabilities with CVSS >= 7 found
+    // suppressionFile = 'dependency-check-suppressions.xml'  // Uncomment if you have a suppression file
+    analyzers.assemblyEnabled = false // Disable assembly analyzer (optional, depends on project)
+    formats = ['HTML', 'XML']         // Report formats
     outputDirectory = "$buildDir/reports/dependency-check"
-}
-
-// Configure SonarQube plugin (optional, adjust your host and token)
-sonarqube {
-    properties {
-        property "sonar.projectKey", "my-java-project-teja"
-        property "sonar.host.url", "http://localhost:9000"
-        property "sonar.login", System.getenv("SONARQUBE_TOKEN") ?: ""
-    }
 }

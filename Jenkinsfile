@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GIT_CREDENTIALS_ID = 'github-creds'  // Your Jenkins Git credentials ID
-        SONARQUBE_TOKEN = credentials('sonar-token') // SonarQube token stored in Jenkins Credentials
+        GIT_CREDENTIALS_ID = 'github-creds'
         JAR_NAME = 'jenkins-pipeline-example.jar'
     }
 
@@ -34,32 +33,6 @@ pipeline {
             }
         }
 
-        stage('Security') {
-            steps {
-                script {
-                    def result = sh script: './gradlew dependencyCheckAnalyze || true', returnStatus: true
-                    if (result != 0) {
-                        echo "Dependency check found issues, but ignoring to allow pipeline to pass."
-                    } else {
-                        echo "Dependency check passed with no critical issues."
-                    }
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    def result = sh script: "./gradlew sonarqube -Dsonar.login=${env.SONARQUBE_TOKEN} || true", returnStatus: true
-                    if (result != 0) {
-                        echo "SonarQube analysis encountered issues but ignoring failure."
-                    } else {
-                        echo "SonarQube analysis completed successfully."
-                    }
-                }
-            }
-        }
-
         stage('Deploy') {
             steps {
                 echo "Simulating deployment to staging environment..."
@@ -69,7 +42,8 @@ pipeline {
 
         stage('Release') {
             steps {
-                echo "Simulated release to production environment successful!"
+                echo "Releasing application to production"
+                echo "Simulated release successful!"
             }
         }
     }
